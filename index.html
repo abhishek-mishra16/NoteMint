@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteMint — Turn your notes into knowledge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">🍃</span>
+      <div class="brand-text">
+        <span class="brand-name">NoteMint</span>
+        <span class="brand-sub">AI Notes Summarizer</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-page="home"><span class="nav-ic">🏠</span>Home</button>
+      <button class="nav-item" data-page="library"><span class="nav-ic">📚</span>My Library</button>
+      <button class="nav-item" data-page="summary"><span class="nav-ic">📝</span>Summaries</button>
+      <button class="nav-item" data-page="mcq"><span class="nav-ic">❓</span>MCQs</button>
+      <button class="nav-item" data-page="shortq"><span class="nav-ic">✍️</span>Short Questions</button>
+      <button class="nav-item" data-page="mindmap"><span class="nav-ic">🗺️</span>Mind Maps</button>
+      <button class="nav-item" data-page="flashcards"><span class="nav-ic">🃏</span>Flashcards</button>
+    </nav>
+
+    <div class="nav nav-bottom">
+      <button class="nav-item" data-page="settings"><span class="nav-ic">⚙️</span>Settings</button>
+      <button class="nav-item" data-page="help"><span class="nav-ic">🛟</span>Help &amp; Support</button>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Switch light and dark theme" aria-pressed="false">
+      <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+      <span class="theme-toggle-copy"><b class="theme-label">Light Mode</b><small>Appearance</small></span>
+      <span class="theme-switch" aria-hidden="true"><span></span></span>
+    </button>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" title="Open menu">Menu</button>
+      <div class="search">
+        <span class="search-ic">🔍</span>
+        <input type="text" placeholder="Search your notes, topics..." id="globalSearch">
+        <kbd>Ctrl · K</kbd>
+      </div>
+      <div class="topbar-right">
+        <div class="notification-menu" id="notificationMenu">
+          <button class="icon-btn notification-btn" id="notificationBtn" title="Notifications" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel">
+            <span class="bell-icon">🔔</span><span class="notification-badge" id="notificationBadge">3</span>
+          </button>
+          <div class="notification-panel glass" id="notificationPanel" hidden>
+            <div class="notification-head"><div><b>Notifications</b><small id="notificationCountText">3 unread</small></div><button id="markNotificationsRead">Mark all read</button></div>
+            <div class="notification-list" id="notificationList">
+              <button class="notification-item unread"><span class="notification-icon">✨</span><span><b>Your study pack is ready</b><small>Open your latest generated pack.</small></span><i>now</i></button>
+              <button class="notification-item unread"><span class="notification-icon">🧠</span><span><b>Keep your momentum going</b><small>Try a quick MCQ session.</small></span><i>5m</i></button>
+              <button class="notification-item unread"><span class="notification-icon">📚</span><span><b>Library updated</b><small>Your recent notes are safely saved.</small></span><i>1h</i></button>
+            </div>
+            <div class="notification-empty" id="notificationEmpty" hidden>All caught up ✨</div>
+          </div>
+        </div>
+        <button class="auth-cta" id="authOpenBtn">Sign up / Log in</button>
+        <div class="profile-menu" id="profileMenu" hidden>
+          <button class="profile-trigger" id="profileTrigger" aria-expanded="false" aria-controls="profileDropdown">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-text">
+              <span class="hey" id="studentGreeting">Hey, Student 👋</span>
+              <span class="welcome">Welcome back!</span>
+            </div>
+            <span class="chevron">⌄</span>
+          </button>
+          <div class="profile-dropdown glass" id="profileDropdown">
+            <button class="profile-row profile-link" id="profileInfoBtn"><span>◉</span><b>Profile</b></button>
+            <div class="profile-divider"></div>
+            <div class="profile-label">Mascot Name</div>
+            <div class="profile-value-row"><span id="profileMascotName">Mint</span><button id="changeMascotBtn" title="Change mascot name">✎</button></div>
+            <div class="profile-label">Account</div>
+            <div class="profile-value" id="studentEmail">student@example.com</div>
+            <div class="profile-divider"></div>
+            <button class="profile-row theme-row" id="profileThemeBtn"><span>◐</span><span>Theme</span><em id="profileThemeValue">Light</em><span>›</span></button>
+            <div class="profile-divider"></div>
+            <button class="profile-row logout-row" id="signOutBtn">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ======= PAGE: HOME / UPLOAD ======= -->
+    <section class="page active" id="page-home">
+      <div class="home-grid">
+        <div class="hero-card glass">
+          <p class="hello" id="heroGreeting">Hello, learner 👋</p>
+          <h1>Turn your notes into<br><span class="accent">knowledge.</span></h1>
+          <p class="hero-copy">Upload your notes and let NoteMint generate summaries, MCQs, short questions, mind maps and flashcards.</p>
+
+          <div class="dropzone" id="dropzone">
+            <div class="drop-ic">⬆️</div>
+            <p class="drop-title">Drag &amp; drop your file here</p>
+            <p class="drop-sub">or <span class="browse-link" id="browseLink">browse from device</span></p>
+            <p class="drop-formats">PDF, DOCX, TXT supported</p>
+            <input type="file" id="fileInput" accept=".pdf,.docx,.txt" hidden>
+          </div>
+
+          <div class="hero-actions">
+            <div class="hero-action"><span class="act-ic peach">📄</span><div><b>AI Summaries</b><small>Instant key points</small></div></div>
+            <div class="hero-action"><span class="act-ic mint">✅</span><div><b>MCQs</b><small>Practice &amp; evaluate</small></div></div>
+            <div class="hero-action"><span class="act-ic lavender">🧭</span><div><b>Mind Maps</b><small>Visualize concepts</small></div></div>
+            <div class="hero-action"><span class="act-ic blue">✍️</span><div><b>Short Questions</b><small>Test your knowledge</small></div></div>
+            <div class="hero-action"><span class="act-ic peach2">🗂️</span><div><b>Flashcards</b><small>Smart revision</small></div></div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="mascot-wrap glass">
+            <div class="mascot-stage idle">
+              <div class="spark s1"></div>
+              <div class="spark s2"></div>
+              <div class="spark s3"></div>
+              <img src="assets/mascot.png" alt="NoteMint mascot" class="mascot-img" id="mascotHome">
+              <div class="mascot-fallback" aria-hidden="true">NM</div>
+              <div class="mascot-thought-bubble">Let me analyze<br>these notes...<span></span></div>
+            </div>
+            <div class="mascot-caption">
+              <span>Meet your<br>study buddy 👋</span>
+              <strong>I’m <span id="mascotNameHome">Mint</span>!</strong>
+              <small>You can call me by the name you like!</small>
+              <button class="change-name-btn" id="homeChangeMascotBtn">Change Name ✎</button>
+            </div>
+          </div>
+
+          <div class="recent-packs glass">
+            <div class="recent-head">
+              <h3>Recent Study Packs</h3>
+            </div>
+            <div class="recent-list" id="recentPacksList"></div>
+            <a href="#" class="view-all" data-page="library">View all library →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-thinking-card glass">
+        <div class="thinking-header">
+          <h3><span id="homeThinkingName">Mint</span> is thinking<span class="dots">...</span></h3>
+          <span class="paper-plane">➤</span>
+        </div>
+        <p class="thinking-sub">Analyzing your notes and connecting the dots</p>
+        <div class="thinking-content">
+          <div class="thinking-mascot-wrap">
+            <div class="thinking-glow"></div>
+            <img src="assets/mascot.png" alt="Thinking mascot" class="home-thinking-mascot">
+            <div class="home-thought">💭</div>
+          </div>
+          <div class="thinking-progress-area">
+            <div class="thinking-steps">
+              <div class="thinking-step active"><i>▣</i><b>Reading</b><small>Extracting text</small></div>
+              <div class="thinking-step active"><i>▤</i><b>Analyzing</b><small>Understanding<br>content</small></div>
+              <div class="thinking-step active"><i>✣</i><b>Understanding</b><small>Finding key<br>concepts</small></div>
+              <div class="thinking-step active"><i>⌂</i><b>Organizing</b><small>Structuring<br>information</small></div>
+              <div class="thinking-step active"><i>⌘</i><b>Generating</b><small>Creating study<br>pack</small></div>
+              <div class="thinking-step current"><i>✓</i><b>Done!</b><small>Almost ready 🎉</small></div>
+            </div>
+            <div class="home-progress"><span id="homeProgressFill"></span></div>
+            <div class="home-progress-meta"><strong id="homeProgressPct">78%</strong><span>Preparing your personalized study pack...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-bottom-row">
+        <button class="sample-btn home-sample-btn" id="sampleBtn">✦ Try with sample notes — Cell Biology</button>
+        <div class="study-tip"><span>💡</span><p><b>Tip:</b> The more detailed your notes, the better the results!</p></div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: PROCESSING ======= -->
+    <section class="page" id="page-processing">
+      <div class="processing-card glass">
+        <h2><span id="procMascotName">Mint</span> is thinking<span class="dots">...</span></h2>
+        <p class="proc-sub">Analyzing your notes and connecting the dots</p>
+
+        <div class="mascot-think stage-reading" id="processingMascotStage" aria-label="Mascot thinking animation">
+          <div class="thought-orbit"></div>
+          <div class="thinking-rings"></div>
+          <img src="assets/mascot.png" alt="thinking mascot" class="mascot-img" id="mascotProcessing">
+          <div class="mascot-fallback" aria-hidden="true">NM</div>
+          <span class="think-bubble b1">💭</span>
+          <span class="think-bubble b2">📊</span>
+          <span class="think-bubble b3">✨</span>
+          <span class="think-bubble b4">?</span>
+          <div class="eye-scan" aria-hidden="true"></div>
+        </div>
+
+        <p class="proc-pct" id="procPct">0%</p>
+        <p class="proc-label" id="procLabel">Understanding your content deeply</p>
+        <p class="proc-sub2" id="procSub2">Extracting key concepts and organizing information.</p>
+
+        <div class="proc-steps">
+          <div class="proc-step" data-step="0"><span class="step-dot">●</span><span>Reading</span></div>
+          <div class="proc-step" data-step="1"><span class="step-dot">●</span><span>Analyzing</span></div>
+          <div class="proc-step" data-step="2"><span class="step-dot">●</span><span>Understanding</span></div>
+          <div class="proc-step" data-step="3"><span class="step-dot">●</span><span>Organizing</span></div>
+          <div class="proc-step" data-step="4"><span class="step-dot">●</span><span>Generating</span></div>
+          <div class="proc-step" data-step="5"><span class="step-dot">●</span><span>Almost Done</span></div>
+        </div>
+        <div class="proc-track"><div class="proc-fill" id="procFill"></div></div>
+
+        <p class="proc-tip">Your notes stay in this browser while the study pack is prepared.</p>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: SUMMARY DASHBOARD ======= -->
+    <section class="page" id="page-summary">
+      <div class="page-head">
+        <div>
+          <div class="crumb">📁 <span id="sumTitle">Biology — Cell Structure</span></div>
+          <p class="crumb-sub">Generated on <span id="sumDate">24 May, 2026</span> · <span id="sumPages">32 Pages</span></p>
+        </div>
+        <div class="download-actions"><button class="btn-outline" id="downloadSummaryBtn">⬇ Download Summary</button><button class="btn-solid" id="downloadAllBtn">⬇ Download Study Pack</button></div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="glass card-pad">
+          <h3>Key Takeaways</h3>
+          <ol class="takeaways" id="takeawaysList"></ol>
+        </div>
+
+        <div class="side-col">
+          <div class="glass card-pad">
+            <h3>Study Pack Overview</h3>
+            <div class="stat-grid">
+              <div class="stat-pill mint"><span id="statKeyPoints">12</span><small>Key Points</small></div>
+              <div class="stat-pill lavender"><span id="statMcqs">20</span><small>MCQs</small></div>
+              <div class="stat-pill peach"><span id="statShortQ">15</span><small>Short Questions</small></div>
+              <div class="stat-pill blue"><span id="statMindmaps">02</span><small>Mind Maps</small></div>
+            </div>
+            <div class="stat-pill full lavender2"><span id="statFlash">25</span><small>Flashcards</small></div>
+          </div>
+
+          <div class="glass card-pad">
+            <h3>Topics Covered</h3>
+            <div class="chips" id="topicChips"></div>
+          </div>
+
+          <div class="glass card-pad">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+              <button class="qa-btn" data-page="mcq">🧠 MCQs</button>
+              <button class="qa-btn" data-page="shortq">✍️ Short Questions</button>
+              <button class="qa-btn" data-page="mindmap">🧭 Mind Map</button>
+              <button class="qa-btn" data-page="flashcards">🗂️ Flashcards</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: MCQ ======= -->
+    <section class="page" id="page-mcq">
+      <div class="quiz-head">
+        <h2>📋 MCQs <span class="count" id="mcqCount">20 Questions</span></h2>
+        <button class="btn-outline" id="downloadMcqBtn">⬇ Download MCQs</button>
+        <span class="q-progress" id="mcqProgress">Question 1 / 20</span>
+      </div>
+      <div class="quiz-track"><div class="quiz-fill" id="mcqTrackFill"></div></div>
+
+      <div class="quiz-body">
+        <div class="glass card-pad quiz-card">
+          <p class="diff-tag" id="mcqDiff">Medium</p>
+          <p class="q-text" id="mcqQuestion">Loading question…</p>
+          <div class="options" id="mcqOptions"></div>
+          <div class="quiz-nav">
+            <button class="btn-outline" id="mcqPrev">← Previous</button>
+            <button class="btn-solid" id="mcqNext">Next Question →</button>
+          </div>
+        </div>
+
+        <div class="glass card-pad feedback-card" id="mcqFeedback">
+          <p class="fb-status" id="mcqFbStatus">Pick an answer</p>
+          <p class="fb-explain" id="mcqFbExplain">Choose an option to see the explanation.</p>
+          <div class="fruit">🍊</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: SHORT QUESTIONS ======= -->
+    <section class="page" id="page-shortq">
+      <div class="quiz-head">
+        <h2>✍️ Short Questions <span class="count" id="sqCount">15 Questions</span></h2>
+        <button class="btn-outline" id="downloadShortQBtn">⬇ Download Questions</button>
+        <span class="q-progress" id="sqProgress">Question 1 / 15</span>
+      </div>
+      <div class="quiz-track"><div class="quiz-fill" id="sqTrackFill"></div></div>
+
+      <div class="quiz-body">
+        <div class="glass card-pad quiz-card">
+          <p class="q-text" id="sqQuestion">Loading question…</p>
+          <textarea id="sqAnswerInput" placeholder="Write your answer here..." maxlength="1000"></textarea>
+          <div class="editor-bar">
+            <span><b>B</b></span><span><i>I</i></span><span>≡</span><span>↺</span>
+            <span class="char-count"><span id="sqCharCount">0</span>/1000</span>
+          </div>
+          <div class="quiz-nav">
+            <button class="btn-outline" id="sqPrev">← Previous</button>
+            <button class="btn-solid" id="sqReveal">Reveal Answer →</button>
+          </div>
+        </div>
+
+        <div class="glass card-pad feedback-card" id="sqAnswerCard" style="display:none">
+          <div class="tabs"><span class="tab active">Answer</span><span class="tab">My Answer</span></div>
+          <p class="fb-explain" id="sqModelAnswer"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: MIND MAP ======= -->
+    <section class="page" id="page-mindmap">
+      <div class="page-head">
+        <h2>🧭 Mind Map</h2>
+        <div class="mm-actions">
+          <button class="icon-btn" id="downloadMindmapBtn">⬇ Download SVG</button>
+          <button class="icon-btn" id="mindmapFullscreenBtn">⛶</button>
+        </div>
+      </div>
+      <div class="glass mindmap-canvas-wrap">
+        <svg id="mindmapSvg" viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="mm-zoom">
+          <button id="mmZoomIn">+</button>
+          <button id="mmZoomOut">−</button>
+          <button id="mmZoomReset">⛶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: FLASHCARDS ======= -->
+    <section class="page" id="page-flashcards">
+      <div class="page-head">
+        <h2>🗂️ Flashcards <span class="count" id="fcCount">25 Cards</span></h2>
+        <button class="btn-outline" id="downloadFlashcardsBtn">⬇ Download Cards</button>
+      </div>
+      <div class="flash-stage">
+        <button class="flash-arrow" id="fcPrev">‹</button>
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-inner" id="flashcardInner">
+            <div class="flash-face flash-front">
+              <span class="flash-label">FRONT</span>
+              <span class="flash-index" id="fcIndex">01 / 25</span>
+              <p class="flash-text" id="fcFrontText">What is ATP?</p>
+              <span class="flash-flip">⟲ Click to flip</span>
+            </div>
+            <div class="flash-face flash-back">
+              <span class="flash-label">BACK</span>
+              <p class="flash-text" id="fcBackText"></p>
+              <span class="flash-flip">⟲ Click to flip</span>
+            </div>
+          </div>
+        </div>
+        <button class="flash-arrow" id="fcNext">›</button>
+      </div>
+      <div class="flash-rate">
+        <button class="rate-btn again">↺ Again</button>
+        <button class="rate-btn good">⭐ Good</button>
+        <button class="rate-btn easy">✓ Easy</button>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: LIBRARY ======= -->
+    <section class="page" id="page-library">
+      <div class="page-head">
+        <h2>📚 Study Library</h2>
+      </div>
+      <div class="lib-search">
+        <span class="search-ic">🔍</span>
+        <input type="text" placeholder="Search your study packs..." id="libSearch">
+      </div>
+      <div class="lib-filters" id="libFilters">
+        <button class="filter-chip active" data-filter="All">All</button>
+        <button class="filter-chip" data-filter="Recent">Recent</button>
+      </div>
+      <div class="lib-grid" id="libraryGrid"></div>
+    </section>
+
+    <!-- ======= PAGE: STUDY PACK (tabbed) ======= -->
+    <section class="page" id="page-pack">
+      <div class="pack-head">
+        <div>
+          <div class="crumb" id="packTitle">Biology — Cell Structure</div>
+        </div>
+        <div class="mm-actions">
+          <button class="icon-btn" id="downloadPackAllBtn">⬇ Download All</button>
+          <button class="icon-btn" id="packMoreBtn">⋮</button>
+        </div>
+      </div>
+      <div class="pack-tabs" id="packTabs">
+        <button class="pack-tab active" data-tab="overview">Summary</button>
+        <button class="pack-tab" data-tab="mcqTab">MCQs</button>
+        <button class="pack-tab" data-tab="sqTab">Short Questions</button>
+        <button class="pack-tab" data-tab="mmTab">Mind Map</button>
+        <button class="pack-tab" data-tab="fcTab">Flashcards</button>
+      </div>
+
+      <div class="pack-body">
+        <aside class="pack-side glass">
+          <p class="pack-side-title">On this page</p>
+          <a href="#pk-overview">Overview</a>
+          <a href="#pk-takeaways">Key Takeaways</a>
+          <a href="#pk-topics">Topics Covered</a>
+          <a href="#pk-important">Important Points</a>
+          <a href="#pk-conclusion">Conclusion</a>
+        </aside>
+
+        <div class="pack-main glass" id="packMain"></div>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: SETTINGS ======= -->
+    <section class="page" id="page-settings">
+      <div class="page-head"><h2>⚙️ Settings</h2></div>
+      <div class="glass card-pad" style="max-width:520px">
+        <p style="margin-bottom:14px;color:var(--muted)">Student profile</p>
+        <div class="profile-settings">
+          <button class="qa-btn" id="settingsAuthBtn">Manage local account</button>
+          <label class="field-label" for="mascotNameInput">Character name</label>
+          <div class="name-row">
+            <input type="text" id="mascotNameInput" maxlength="24" placeholder="Mint">
+            <button class="btn-solid" id="saveMascotNameBtn">Save</button>
+          </div>
+          <small class="local-note">Saved only in this browser with localStorage.</small>
+        </div>
+        <p style="margin-bottom:14px;color:var(--muted)">Appearance</p>
+        <div class="quick-actions">
+          <button class="qa-btn" id="settingsLight">☀️ Light Theme</button>
+          <button class="qa-btn" id="settingsDark">🌙 Dark Theme</button>
+        </div>
+        <p style="margin:22px 0 14px;color:var(--muted)">Data</p>
+        <button class="btn-outline" id="clearDataBtn">🗑 Clear all study packs</button>
+      </div>
+    </section>
+
+    <!-- ======= PAGE: HELP ======= -->
+    <section class="page" id="page-help">
+      <div class="page-head"><h2>🛟 Help &amp; Support</h2></div>
+      <div class="glass card-pad" style="max-width:640px">
+        <p style="color:var(--muted);line-height:1.7">NoteMint turns your PDF, DOCX or TXT notes into summaries, MCQs, short questions, mind maps and flashcards — right in your browser. Nothing is uploaded to a server; all processing happens on your device.</p>
+        <p style="margin-top:16px;font-weight:600">Tips</p>
+        <ul style="margin-top:8px;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Longer, well-structured notes produce richer study packs.</li>
+          <li>Use the sample notes to preview the whole experience instantly.</li>
+          <li>Your packs are saved locally in this browser under My Library.</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="authModal" hidden>
+  <div class="auth-modal glass" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button class="modal-close" id="authCloseBtn" title="Close">×</button>
+    <p class="modal-kicker">Welcome to NoteMint</p>
+    <h2 id="authTitle">Create your student profile</h2>
+    <p class="modal-copy">Save your study identity and make NoteMint feel like your personal study space.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-mode="signup">Sign up</button>
+      <button class="auth-tab" data-auth-mode="login">Log in</button>
+    </div>
+    <form id="authForm" class="auth-form">
+      <label class="field-label" for="authName" id="authNameLabel">Name</label>
+      <input type="text" id="authName" autocomplete="name" placeholder="Your name">
+      <label class="field-label" for="authEmail">Email</label>
+      <input type="email" id="authEmail" autocomplete="email" placeholder="student@example.com" required>
+      <button class="btn-solid" type="submit" id="authSubmitBtn">Create local profile</button>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
