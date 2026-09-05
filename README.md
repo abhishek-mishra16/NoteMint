@@ -51,7 +51,7 @@ python -m http.server 8765
 Then open `http://127.0.0.1:8765/index.html`.
 
 ## Reference UI upgrade
-The dashboard now follows the supplied NoteMint visual reference: rounded glass panels, pastel coral accents, a top-right student profile menu, animated mascot presentation, animated study-processing preview, responsive layouts, and a cleaner student sign-up/login flow. The sign-up/login copy intentionally stays focused on the student experience.
+The dashboard now follows the supplied NoteMint visual reference: rounded glass panels, pastel coral accents, a top-right student profile menu, animated mascot presentation, animated study-processing preview, responsive layouts, and a cleaner student sign-up/login flow. The sign-up/login copy intentionally stays focused on the student's experience.
 
 
 ## Downloading generated study material
