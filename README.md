@@ -65,4 +65,4 @@ After generating a study pack, NoteMint can download:
 - Complete Study Pack as a standalone HTML file containing all sections and the generated mind map
 
 The processing mascot now changes motion for each stage: Reading, Analyzing, Understanding, Organizing, Generating, and Done.
-Now NoteMint is ready to use . 
+NoteMint is ready to use . 
