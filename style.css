@@ -1414,3 +1414,4 @@ html:not([data-theme="dark"]) .theme-switch span{transform:translateX(0);}
   .mascot-think::before,
   .mascot-think::after { animation-duration: 3s !important; animation-iteration-count: 1 !important; }
 }
+
